@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.5)
+project(TestDatabase)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+
+set(SOURCE_FILES main.cpp Server.h BTree.h SimpleBTree.h)
+add_executable(TestDatabase ${SOURCE_FILES})
