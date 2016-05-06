@@ -1,7 +1,11 @@
 #include <iostream>
 #include <signal.h>
 #include <limits>
-#include "Server.h"
+#ifdef __APPLE__
+    #ifndef TARGET_OS_MAC
+        //#include "Server.h"
+    #endif
+#endif 
 #include "SimpleBTree.h"
 using namespace std;
 static Server * serv = nullptr;

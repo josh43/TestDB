@@ -38,7 +38,7 @@ public:
     SimpleBTree(){
         root = new SimpleNode();
         root->isLeaf = 1;
-        root->parent == nullptr;
+        root->parent = nullptr;
         leafLevel = 0;
     }
     ~SimpleBTree(){
