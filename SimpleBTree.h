@@ -118,7 +118,7 @@ public:
                         // only need to create 1 additional bucket
 
                     }else{
-                        splitHelper(nodeLoc);
+                       // splitHelper(nodeLoc);
                         // rinse and repeat essay
                     }
                 }
@@ -289,24 +289,7 @@ private:
                 }
             }
 
-            SimpleNode * findNodeToInsert(int x){
-                SimpleNode * toReturn = root;
-        // while its not a leaf
-                while(!toReturn->isLeaf) {
-                    int i;
-                    for ( i = 0; i < 2; i++) {
-                        if(x < toReturn->data[i] || toReturn->data[i] == -1){
-                            toReturn = toReturn->children[i];
-                            break;
-                        }
-                    }
-                    if(i >= 2){
-                     toReturn = toReturn->children[i];
-                 }
-             }
 
-             return toReturn;
-         }
          void insertInOrder(SimpleNode * insertLoc, int x){
             for(int i= 0; i < 2; i++){
                 if(insertLoc->data[i] == -1){

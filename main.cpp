@@ -1,31 +1,137 @@
 #include <iostream>
 #include <signal.h>
 #include <limits>
-#ifdef __APPLE__
-    #ifndef TARGET_OS_MAC
-        //#include "Server.h"
-    #endif
-#endif 
-#include "SimpleBTree.h"
+#include <set>
+#include <random>
+#include "Time.h"
+
+//#include "SimpleBTree.h"
+#include "BeeTree.h"
+#include "BeeTreeTester.h"
 using namespace std;
-static Server * serv = nullptr;
 
-void signal_callback_handler(int signum) {
 
-    if(serv != nullptr){
-        printf("Stopping the server\n");
-        pthread_mutex_lock(&LISTENING_LOCK);
-        serv->stop();
-        pthread_mutex_unlock(&LISTENING_LOCK);
 
-    }
-    printf("Caught signal %d\n",signum);
-
-}
 int main(int argc, char * argv[]) {
 
 
-    SimpleBTree btree;
+    testBtree();
+
+    /*
+    theLog = fopen("TheTreeLog.txt","w");
+    if(theLog == NULL){
+        exit(0);
+    }
+     */
+    const int numNodes =7;
+    BeeTree<int,numNodes> b;
+
+    unsigned long start = __rdtsc();
+    unsigned long end = __rdtsc();
+    srand(3);
+    std::set<int> s;
+    std::vector<int> test;
+
+
+    int testSize = 8000000;
+    int progress = 0;
+    int incremenet = testSize / 100;
+    start_exec_timer();
+
+    printf("Time took to insert into a Vector\n");
+    for(int i = 0; i< testSize;i++){
+
+        int val = rand() % numeric_limits<int>::max()-100000;
+
+        if( progress*incremenet + incremenet  <i ){
+            printf("Vector %d\n%",progress++);
+        }
+        test.push_back(val);
+        // test.push_back(val);
+
+    }
+    print_exec_timer();
+    printf("Done inserting into a Vector\n");
+    progress = 0;
+
+    /*
+    start_exec_timer();
+
+    printf("Time took to insert into a Set\n");
+    for(int i = 0; i< testSize;i++){
+
+
+        if( progress*incremenet + incremenet  <i ){
+            printf("set %d%\n",progress++);
+        }
+        s.insert(test[i]);
+        // test.push_back(val);
+
+    }
+    printf("Done inserting into a Set\n");
+
+    print_exec_timer();
+
+    int i = 0;
+     */
+    start_exec_timer();
+    progress = 0;
+    printf("Time took to insert into yoru tree\n");
+    for(int i = 0; i< testSize;i++){
+
+
+        if( progress*incremenet + incremenet  <i ){
+            printf("tree %d\n%",progress++);
+        }
+        b.insert(test[i]);
+        // test.push_back(val);
+
+    }
+    printf("Done inserting into a Tree\n");
+
+    printf("Time took to insert into your tree\n");
+    print_exec_timer();
+    std::vector<int> compare;
+    /*
+    b.insert(5);
+    b.insert(1);
+    b.insert(6);
+    b.insert(2);
+    BeeTree<int,4>::printTree(&b);
+
+    b.insert(11);
+    b.insert(13);
+    b.insert(15);
+    b.insert(17);
+    b.insert(23);
+*/
+
+    BeeTree<int,numNodes>::IterType * itr = b.getIterator();
+    const Node<int,numNodes> * dat;
+    while(!itr->isEmpty()){
+        dat = itr->getData();
+        for(int i = 0; i < 4; i++){
+            if(dat->data[i]){
+                compare.push_back(*(dat->data[i]));
+            }
+        }
+        itr->next();
+    }
+    auto setIt = s.begin();
+    if(s.size() != compare.size()){
+        printf("ERROR BRAH\n");
+
+    }
+    for(auto vecIt = compare.begin();vecIt != compare.end() && setIt != s.end() ;vecIt++,setIt++){
+        if(*vecIt != *setIt){
+            printf("ERROR BRAH\n");
+        }
+    }
+   // BeeTree<int,4>::printTree(&b);
+    fclose(theLog);
+    theLog = NULL;
+    exit(0);
+    /*SimpleBTree btree;
     btree.insert(3);
     btree.insert(2);
     btree.insert(5);
@@ -34,52 +140,13 @@ int main(int argc, char * argv[]) {
     btree.insert(4);
     btree.insert(10);
     SimpleBTree::printTree(&btree);
-    signal(SIGINT,signal_callback_handler);
-
-    struct sockaddr_un addr;
-    int sfd;
-
-    int ret;
+     */
 
     /*
-           * In case the program exited inadvertently on the last run,
-           * remove the socket.
-           */
-
-    if(remove(SOCKET_NAME) == -1 && errno != ENOENT){
-        perror("error on removing socket path\n");
-    }
-
-    if((sfd= socket(AF_UNIX,SOCK_STREAM,0)) == -1){
-        perror("On creating socket file descriptor");
-        exit(EXIT_FAILURE);
-    }
+     *
+     */
 
 
-    memset(&addr,0,sizeof(sockaddr_un));
-    addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, SOCKET_NAME, sizeof(addr.sun_path) - 1);
-
-    ret = bind(sfd, (const struct sockaddr *) &addr,
-               sizeof(struct sockaddr_un));
-    if (ret == -1) {
-        perror("bind");
-        exit(EXIT_FAILURE);
-    }
-/*
-            * Prepare for accepting connections. The backlog size is set
-            * to 20. So while one request is being processed other requests
-            * can be waiting.
-            */
-    ret = listen(sfd,20);
-
-    if (ret == -1) {
-        perror("listen");
-        exit(EXIT_FAILURE);
-    }
-    serv = new Server(100,{0,DEFAULT_TIMEOUT},sfd);
-    serv->beginListening();
-    //printf("Listening on port : d\n",PORT_NUM);
 
     return 0;
 }
